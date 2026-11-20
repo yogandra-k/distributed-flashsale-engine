@@ -1,0 +1,14 @@
+{
+  "name": "distributed-flashsale-engine",
+  "version": "1.0.0",
+  "description": "High-Concurrency Distributed Flash-Sale & E-Commerce Checkout Engine with In-Memory Redis Layer, Token Bucket Rate Limiting, Async Event Queue, and Real-Time Load Testing Simulator",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.17.0"
+  }
+}
