@@ -3,146 +3,383 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High-Concurrency Flash-Sale & E-Commerce Checkout Engine</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>Enterprise High-Concurrency Distributed Flash-Sale Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="layout-container">
-        <!-- Top Navbar -->
-        <header class="header">
-            <div class="brand">
-                <span class="icon">⚡</span>
+    <div class="dashboard-wrapper">
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <span class="brand-icon">⚡</span>
                 <div>
-                    <div class="title">Distributed Flash-Sale Engine</div>
-                    <div class="subtitle">In-Memory Redis Layer · Token Bucket Throttling · Async Kafka Queue · Zero Overselling</div>
-                </div>
-            </div>
-            <div class="header-badges">
-                <span class="badge live-badge" id="ws-status"><span class="dot"></span> LIVE TELEMETRY</span>
-                <button class="btn btn-secondary" onclick="resetInventory()">🔄 Reset Inventory & Cache</button>
-            </div>
-        </header>
-
-        <!-- KPI Metrics Row -->
-        <section class="kpi-row">
-            <div class="kpi-card">
-                <div class="kpi-label">Cache Hit Ratio</div>
-                <div class="kpi-value text-accent" id="metric-cache-hit">99.8%</div>
-                <div class="kpi-sub">In-Memory Sub-millisecond Ops</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Atomic Decrements</div>
-                <div class="kpi-value" id="metric-atomic-ops">0</div>
-                <div class="kpi-sub">Lua / CAS Lockless Sync</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Async Events Queue Depth</div>
-                <div class="kpi-value text-cyan" id="metric-queue-depth">0</div>
-                <div class="kpi-sub" id="metric-queue-processed">0 processed</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-label">Rate-Limited Requests</div>
-                <div class="kpi-value text-warn" id="metric-rate-limited">0</div>
-                <div class="kpi-sub">Token Bucket Shield Active</div>
-            </div>
-        </section>
-
-        <!-- Main Body Grid -->
-        <main class="main-grid">
-            <!-- Left Column: Products & Quick Checkout -->
-            <div class="panel">
-                <h3>🛍️ Flash Sale Inventory (Live Redis State)</h3>
-                <div class="products-list" id="products-container">
-                    <!-- Dynamic Product Cards -->
-                </div>
-
-                <div class="single-checkout-box">
-                    <h4>Single User Manual Checkout</h4>
-                    <div class="form-row">
-                        <input type="text" id="manual-user-id" placeholder="User ID (e.g., user_101)" value="user_guest_1">
-                        <select id="manual-product-select">
-                            <option value="prod_ps5_pro">PlayStation 5 Pro Digital</option>
-                            <option value="prod_iphone_16">iPhone 16 Pro Max</option>
-                            <option value="prod_rtx_5090">NVIDIA RTX 5090 OC</option>
-                        </select>
-                        <button class="btn btn-primary" onclick="handleManualCheckout()">Place Order</button>
-                    </div>
-                    <div id="manual-checkout-alert" class="alert-box"></div>
+                    <h1 class="brand-name">VClaw Engine</h1>
+                    <span class="brand-version">v1.2.0-Enterprise</span>
                 </div>
             </div>
 
-            <!-- Middle Column: Stress Testing Simulator -->
-            <div class="panel">
-                <h3>🚀 Distributed Stress & Concurrency Simulator</h3>
-                <p class="panel-desc">Simulate a flash-sale traffic spike with thousands of concurrent virtual buyers to verify zero race conditions and zero inventory overselling.</p>
-                
-                <div class="stress-form">
-                    <div class="form-group">
-                        <label>Target Product</label>
-                        <select id="stress-product-select">
-                            <option value="prod_ps5_pro">PlayStation 5 Pro (Initial Stock: 100)</option>
-                            <option value="prod_iphone_16">iPhone 16 Pro Max (Initial Stock: 50)</option>
-                            <option value="prod_rtx_5090">NVIDIA RTX 5090 (Initial Stock: 25)</option>
-                        </select>
-                    </div>
+            <nav class="sidebar-menu">
+                <button class="menu-item active" onclick="switchTab('dashboard')">
+                    <span class="menu-icon">📊</span>
+                    <span>Live Telemetry Dash</span>
+                </button>
+                <button class="menu-item" onclick="switchTab('architecture')">
+                    <span class="menu-icon">🏗️</span>
+                    <span>System Architecture</span>
+                </button>
+                <button class="menu-item" onclick="switchTab('playground')">
+                    <span class="menu-icon">🔗</span>
+                    <span>API Playground & Docs</span>
+                </button>
+                <button class="menu-item" onclick="switchTab('database')">
+                    <span class="menu-icon">💾</span>
+                    <span>PostgreSQL Registry</span>
+                </button>
+            </nav>
 
-                    <div class="form-group">
-                        <label>Total Concurrent Requests: <span id="label-total-req" class="badge">1,000 reqs</span></label>
-                        <input type="range" id="input-total-req" min="100" max="5000" step="100" value="1000" oninput="document.getElementById('label-total-req').innerText = Number(this.value).toLocaleString() + ' reqs'">
-                    </div>
+            <div class="candidate-meta">
+                <div class="meta-label">Candidate Profile</div>
+                <div class="meta-val">Kalisetti Yogandra</div>
+                <div class="meta-sub">GITAM University</div>
+                <div class="meta-badge">SDE-1 Ready</div>
+            </div>
+        </aside>
 
-                    <div class="form-group">
-                        <label>Simulated Concurrency Batch Size: <span id="label-concurrency" class="badge">100 threads</span></label>
-                        <input type="range" id="input-concurrency" min="10" max="250" step="10" value="100" oninput="document.getElementById('label-concurrency').innerText = this.value + ' threads'">
-                    </div>
-
-                    <div class="checkbox-group">
-                        <label>
-                            <input type="checkbox" id="input-bot-spam">
-                            <span>Simulate Malicious Bot Flood (Test Token Bucket Rate Limiting)</span>
-                        </label>
-                    </div>
-
-                    <button class="btn btn-danger" id="btn-run-stress" onclick="runStressBenchmark()">⚡ Launch Stress Test</button>
+        <!-- MAIN CONTENT AREA -->
+        <div class="main-content">
+            <!-- HEADER -->
+            <header class="top-nav">
+                <div class="nav-left">
+                    <h2 id="current-tab-title">Distributed Telemetry & Stress Dashboard</h2>
                 </div>
+                <div class="nav-right">
+                    <span class="badge live-badge" id="ws-status">
+                        <span class="dot"></span> LIVE TELEMETRY
+                    </span>
+                    <button class="btn btn-secondary" onclick="resetInventory()">
+                        🔄 Reset Inventory & Flush Redis
+                    </button>
+                </div>
+            </header>
 
-                <!-- Stress Results Output -->
-                <div id="stress-result-card" class="stress-result-card" style="display: none;">
-                    <h4>Benchmark Results & Verification</h4>
-                    <div class="benchmark-grid">
-                        <div><strong>Throughput:</strong> <span id="res-rps" class="text-accent">0</span> RPS</div>
-                        <div><strong>Avg Latency:</strong> <span id="res-latency">0</span> ms</div>
-                        <div><strong>Successful Orders:</strong> <span id="res-success" class="text-accent">0</span></div>
-                        <div><strong>Sold-out Rejections:</strong> <span id="res-out-of-stock" class="text-warn">0</span></div>
-                        <div><strong>Rate-Limited:</strong> <span id="res-rate-limited">0</span></div>
-                        <div><strong>Overselling Verified:</strong> <span id="res-oversold" class="badge-safe">PASSED (0 Oversold)</span></div>
+            <!-- TAB 1: TELEMETRY & STRESS TEST -->
+            <section id="tab-dashboard" class="tab-pane active">
+                <!-- KPI GRID -->
+                <div class="kpi-grid">
+                    <div class="kpi-card glass">
+                        <div class="kpi-icon-box">🎯</div>
+                        <div>
+                            <div class="kpi-label">Cache Hit Ratio</div>
+                            <div class="kpi-value text-accent" id="metric-cache-hit">100%</div>
+                            <div class="kpi-sub">Sub-millisecond Ops</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass">
+                        <div class="kpi-icon-box text-cyan">🔒</div>
+                        <div>
+                            <div class="kpi-label">Atomic Decrements</div>
+                            <div class="kpi-value" id="metric-atomic-ops">0</div>
+                            <div class="kpi-sub">Lua Lockless Decrements</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass">
+                        <div class="kpi-icon-box text-blue">📥</div>
+                        <div>
+                            <div class="kpi-label">Async Event queue</div>
+                            <div class="kpi-value text-cyan" id="metric-queue-depth">0</div>
+                            <div class="kpi-sub" id="metric-queue-processed">0 processed</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass">
+                        <div class="kpi-icon-box text-warn">🛡️</div>
+                        <div>
+                            <div class="kpi-label">Rate-Limited Requests</div>
+                            <div class="kpi-value text-warn" id="metric-rate-limited">0</div>
+                            <div class="kpi-sub">Token Bucket Shield</div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Right Column: Real-Time Stream & Charts -->
-            <div class="panel">
-                <h3>📊 Real-Time Latency & Event Stream</h3>
-                <div class="chart-container">
-                    <canvas id="latencyChart"></canvas>
+                <!-- DASHBOARD CONTENT SPLIT -->
+                <div class="content-split">
+                    <!-- Column 1: Inventory Status & Manual Control -->
+                    <div class="card glass">
+                        <div class="card-header">
+                            <h3>🛍️ Flash Sale Inventory Status</h3>
+                            <span class="badge">In-Memory Redis</span>
+                        </div>
+                        <div class="products-list" id="products-container">
+                            <!-- Dynamic Cards -->
+                        </div>
+
+                        <div class="single-checkout-box">
+                            <h4>Place Manual Single Order</h4>
+                            <div class="form-row">
+                                <div class="input-wrap">
+                                    <label>User Identity</label>
+                                    <input type="text" id="manual-user-id" placeholder="user_guest_1" value="user_guest_1">
+                                </div>
+                                <div class="input-wrap">
+                                    <label>Product</label>
+                                    <select id="manual-product-select">
+                                        <option value="prod_ps5_pro">PlayStation 5 Pro ($699.99)</option>
+                                        <option value="prod_iphone_16">iPhone 16 Pro Max ($1199.00)</option>
+                                        <option value="prod_rtx_5090">NVIDIA RTX 5090 ($1999.00)</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" onclick="handleManualCheckout()" style="margin-top: 6px;">Submit Transaction</button>
+                            </div>
+                            <div id="manual-checkout-alert" class="alert-box"></div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Stress Testing Benchmark -->
+                    <div class="card glass">
+                        <div class="card-header">
+                            <h3>🚀 Concurrency Benchmark Simulator</h3>
+                            <span class="badge badge-danger">High Load</span>
+                        </div>
+                        <p class="card-desc">Storm the checkout endpoints with parallel virtual threads to verify transaction safety limits.</p>
+                        
+                        <div class="stress-form">
+                            <div class="form-group">
+                                <label>Target Campaign</label>
+                                <select id="stress-product-select">
+                                    <option value="prod_ps5_pro">PlayStation 5 Pro (Initial Stock: 100)</option>
+                                    <option value="prod_iphone_16">iPhone 16 Pro Max (Initial Stock: 50)</option>
+                                    <option value="prod_rtx_5090">NVIDIA RTX 5090 (Initial Stock: 25)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="flex-row">
+                                    <label>Total Concurrent Requests</label>
+                                    <span id="label-total-req" class="badge">1,000 reqs</span>
+                                </div>
+                                <input type="range" id="input-total-req" min="100" max="5000" step="100" value="1000" oninput="document.getElementById('label-total-req').innerText = Number(this.value).toLocaleString() + ' reqs'">
+                            </div>
+
+                            <div class="form-group">
+                                <div class="flex-row">
+                                    <label>Concurrency Batch Size</label>
+                                    <span id="label-concurrency" class="badge">100 threads</span>
+                                </div>
+                                <input type="range" id="input-concurrency" min="10" max="250" step="10" value="100" oninput="document.getElementById('label-concurrency').innerText = this.value + ' threads'">
+                            </div>
+
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="input-bot-spam">
+                                    <span>Simulate Malicious Spammer Bot Flood (Activates Rate Limiting)</span>
+                                </label>
+                            </div>
+
+                            <button class="btn btn-danger" id="btn-run-stress" onclick="runStressBenchmark()" style="width: 100%; padding: 12px;">
+                                ⚡ Launch Concurrency Storm
+                            </button>
+                        </div>
+
+                        <!-- Benchmark Output Card -->
+                        <div id="stress-result-card" class="stress-result-card" style="display: none;">
+                            <h4>🏆 Benchmark Analysis</h4>
+                            <div class="benchmark-grid">
+                                <div class="bench-item">
+                                    <span class="lbl">Throughput</span>
+                                    <span class="val text-accent" id="res-rps">0 RPS</span>
+                                </div>
+                                <div class="bench-item">
+                                    <span class="lbl">Avg Latency</span>
+                                    <span class="val" id="res-latency">0 ms</span>
+                                </div>
+                                <div class="bench-item">
+                                    <span class="lbl">Success Orders</span>
+                                    <span class="val text-accent" id="res-success">0</span>
+                                </div>
+                                <div class="bench-item">
+                                    <span class="lbl">Rate Limited</span>
+                                    <span class="val text-warn" id="res-rate-limited">0</span>
+                                </div>
+                            </div>
+                            <div class="oversold-badge" id="res-oversold">
+                                PASSED: Zero Inventory Overselling Verified
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 3: Live Charts & Broker Stream -->
+                    <div class="card glass">
+                        <div class="card-header">
+                            <h3>📈 Dynamic Kafka Stream & Latency</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="latencyChart"></canvas>
+                        </div>
+
+                        <h4 class="stream-title">📩 Recent Kafka Broker Events</h4>
+                        <div class="order-stream" id="order-stream-list">
+                            <!-- Stream dynamic items -->
+                        </div>
+                    </div>
                 </div>
+            </section>
 
-                <h4 style="margin-top: 15px; margin-bottom: 8px; font-size: 13px; color: #94a3b8;">Recent Processed Orders (Kafka Stream)</h4>
-                <div class="order-stream" id="order-stream-list">
-                    <!-- Stream items -->
+            <!-- TAB 2: INTERACTIVE ARCHITECTURE DIAGRAM -->
+            <section id="tab-architecture" class="tab-pane">
+                <div class="card glass arch-card">
+                    <div class="card-header">
+                        <h3>🏗️ Live Event-Driven Distributed Architecture Pipeline</h3>
+                        <p class="subtitle">Hover over any block to inspect its role inside the high-concurrency request flow.</p>
+                    </div>
+
+                    <div class="interactive-pipeline">
+                        <!-- Step 1 -->
+                        <div class="pipeline-node" id="node-rate-limit" onmouseover="showNodeInfo('rate-limit')">
+                            <div class="node-icon">🛡️</div>
+                            <h4>1. Rate Limiting Shield</h4>
+                            <span class="tech-tag">Token Bucket</span>
+                            <p class="node-short">Shields the system against scraper bots and DDoS attacks.</p>
+                        </div>
+
+                        <div class="connector">➡</div>
+
+                        <!-- Step 2 -->
+                        <div class="pipeline-node" id="node-idempotency" onmouseover="showNodeInfo('idempotency')">
+                            <div class="node-icon">🔑</div>
+                            <h4>2. Idempotency filter</h4>
+                            <span class="tech-tag">Key-Value Store</span>
+                            <p class="node-short">Prevents double-charging on duplicate client submissions.</p>
+                        </div>
+
+                        <div class="connector">➡</div>
+
+                        <!-- Step 3 -->
+                        <div class="pipeline-node" id="node-redis" onmouseover="showNodeInfo('redis')">
+                            <div class="node-icon">💾</div>
+                            <h4>3. Atomic Cache Reserve</h4>
+                            <span class="tech-tag">Redis Lua CAS</span>
+                            <p class="node-short">Guarantees zero-overselling with sub-millisecond atomic checks.</p>
+                        </div>
+
+                        <div class="connector">➡</div>
+
+                        <!-- Step 4 -->
+                        <div class="pipeline-node" id="node-kafka" onmouseover="showNodeInfo('kafka')">
+                            <div class="node-icon">📥</div>
+                            <h4>4. Async Event Broker</h4>
+                            <span class="tech-tag">Kafka Stream</span>
+                            <p class="node-short">Decouples checkout from slow database writing.</p>
+                        </div>
+
+                        <div class="connector">➡</div>
+
+                        <!-- Step 5 -->
+                        <div class="pipeline-node" id="node-db" onmouseover="showNodeInfo('db')">
+                            <div class="node-icon">🗄️</div>
+                            <h4>5. PostgreSQL Sync</h4>
+                            <span class="tech-tag">Batch Ingestion</span>
+                            <p class="node-short">Asynchronously writes confirmed invoices to DB.</p>
+                        </div>
+                    </div>
+
+                    <div class="node-details-box" id="node-details">
+                        <h4>💡 Hover over any pipeline component above to inspect its real-time operational logic.</h4>
+                    </div>
                 </div>
-            </div>
-        </main>
+            </section>
 
-        <!-- System Architecture Modal/Banner -->
-        <footer class="footer">
-            <div>Engine Architecture: <strong>Atomic Lua Decrements + Redis Cache-Aside + Event Queue Async Ingestion + Idempotency Shield</strong></div>
-            <div>GitHub & Portfolio Ready · High-Concurrency SDE Project</div>
-        </footer>
+            <!-- TAB 3: API PLAYGROUND & DOCS -->
+            <section id="tab-playground" class="tab-pane">
+                <div class="playground-layout">
+                    <!-- API Endpoints Doc -->
+                    <div class="card glass">
+                        <div class="card-header">
+                            <h3>🔗 Interactive API Swagger Playground</h3>
+                        </div>
+                        
+                        <div class="endpoint-block">
+                            <div class="endpoint-header">
+                                <span class="method post">POST</span>
+                                <span class="path">/api/checkout</span>
+                                <span class="desc">High-Concurrency Checkout Reservation</span>
+                            </div>
+                            <div class="endpoint-body">
+                                <h5>Request Schema (JSON)</h5>
+                                <pre><code class="language-json">{
+  "userId": "user_2023001287",
+  "productId": "prod_ps5_pro",
+  "quantity": 1,
+  "idempotencyKey": "idemp_abc123xyz"
+}</code></pre>
+
+                                <div class="form-group" style="margin-top: 10px;">
+                                    <button class="btn btn-primary" onclick="triggerPlaygroundCheckout()">⚡ Execute API Request</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="endpoint-block">
+                            <div class="endpoint-header">
+                                <span class="method post">POST</span>
+                                <span class="path">/api/inventory/reset</span>
+                                <span class="desc">Flush Cache & Restore Stock</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sandbox Output Console -->
+                    <div class="card glass console-card">
+                        <div class="card-header">
+                            <h3>🖥️ Live REST API Execution Terminal</h3>
+                            <button class="btn btn-secondary" onclick="clearConsole()">Clear</button>
+                        </div>
+                        <div class="terminal-body" id="playground-terminal">
+                            <div class="term-line system">[SYSTEM] Sandbox terminal initialized. Click "Execute API Request" above to dispatch payload.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: DATABASE REGISTRY -->
+            <section id="tab-database" class="tab-pane">
+                <div class="card glass">
+                    <div class="card-header">
+                        <h3>💾 Relational PostgreSQL Invoices Registry (Asynchronous Ingestion Log)</h3>
+                        <p class="subtitle">Simulating real-time batch writes and transactional consistency verification across database nodes.</p>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="db-table">
+                            <thead>
+                                <tr>
+                                    <th>Transaction ID</th>
+                                    <th>User ID</th>
+                                    <th>Product ID</th>
+                                    <th>Qty</th>
+                                    <th>Amount</th>
+                                    <th>Redis Cache Commit</th>
+                                    <th>Async MQ Topic</th>
+                                    <th>PostgreSQL Persist Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="db-invoices-body">
+                                <!-- Dynamic items loaded from telemetry -->
+                                <tr>
+                                    <td colspan="8" class="text-muted text-center" style="padding: 30px;">No transactions processed yet. Run a Stress Test or Manual Order to generate ledger logs.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
 
-    <script src="app.js"></script>
+    <!-- FOOTER -->
+    <footer class="app-footer">
+        <div>Enterprise High-Concurrency Engine | Designed for Distributed Scalability</div>
+        <div>Candidate Portfolio Release · Kalisetti Yogandra</div>
+    </footer>
 </body>
 </html>

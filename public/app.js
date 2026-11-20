@@ -2,6 +2,62 @@ let socket;
 let latencyChart;
 const latencyHistory = [];
 
+// Tab Switcher Logic
+function switchTab(tabId) {
+    document.querySelectorAll('.menu-item').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+
+    const tabBtn = Array.from(document.querySelectorAll('.menu-item')).find(btn => btn.getAttribute('onclick').includes(tabId));
+    if (tabBtn) tabBtn.classList.add('active');
+
+    const targetPane = document.getElementById('tab-' + tabId);
+    if (targetPane) targetPane.classList.add('active');
+
+    const titles = {
+        'dashboard': 'Distributed Telemetry & Stress Dashboard',
+        'architecture': 'Distributed System Architecture & Event Pipeline',
+        'playground': 'REST API Developer Sandbox & Swagger Playground',
+        'database': 'PostgreSQL Relational Ledger & Async Ingestion'
+    };
+    document.getElementById('current-tab-title').innerText = titles[tabId] || 'Distributed Console';
+}
+
+// Interactive Architecture Hover Logic
+function showNodeInfo(nodeType) {
+    const detailsBox = document.getElementById('node-details');
+    const nodes = {
+        'rate-limit': {
+            title: '1. Token Bucket Rate Limiting Shield',
+            desc: 'Tracks discrete user tokens per IP/UserId in a high-speed Redis bucket (20 max capacity, 5 refill/sec). If a bot tries to spam thousands of requests, tokens exhaust instantly, returning HTTP 429 Too Many Requests in <0.2ms before touching any database resources.'
+        },
+        'idempotency': {
+            title: '2. Cryptographic Idempotency Filter',
+            desc: 'Validates unique client transaction tokens (`idemp_<userId>_<nonce>`). If a client network drops and retries an existing order, the cached response is immediately replayed, mathematically preventing double-charging or duplicate order insertions.'
+        },
+        'redis': {
+            title: '3. In-Memory Atomic Reservation (Redis Lua CAS)',
+            desc: 'Executes atomic stock decrement scripts directly in Redis RAM memory. Instead of traditional SQL row-locks (`SELECT FOR UPDATE`) which deadlock under 1,000+ threads, Lua scripts execute as an uninterrupted single-threaded transaction, guaranteeing zero inventory overselling.'
+        },
+        'kafka': {
+            title: '4. Asynchronous Event Broker (Apache Kafka / RabbitMQ)',
+            desc: 'Once the atomic stock is reserved, an `ORDER_CREATED` event is immediately queued into the Kafka topic. The client receives an instant 201 Created acknowledgment in <1ms, decoupling the user from slow downstream disk writes.'
+        },
+        'db': {
+            title: '5. Relational PostgreSQL Batch Ingestion Worker',
+            desc: 'Background consumer worker threads read off Kafka partitions in buffered batches, generating ACID-compliant records and invoice documents without causing database connection saturation or transaction contention.'
+        }
+    };
+
+    const info = nodes[nodeType];
+    if (info) {
+        detailsBox.innerHTML = `
+            <h4>${info.title}</h4>
+            <p>${info.desc}</p>
+        `;
+    }
+}
+
+// WebSocket Live Telemetry Stream
 function initWebSocket() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     socket = new WebSocket(`${protocol}//${window.location.host}`);
@@ -57,7 +113,7 @@ function updateUI(data) {
                 <div class="stock-bar" style="width: ${percent}%; background: ${barColor};"></div>
             </div>
             <div class="product-meta">
-                <span>Stock: <strong>${p.availableStock}</strong> / ${p.initialStock}</span>
+                <span>Available: <strong>${p.availableStock}</strong> / ${p.initialStock}</span>
                 <span>Sold: ${p.totalSold}</span>
             </div>
         `;
@@ -82,7 +138,27 @@ function updateUI(data) {
         streamContainer.appendChild(item);
     });
 
-    // 4. Update Latency Chart
+    // 4. Render Database Table
+    const dbBody = document.getElementById('db-invoices-body');
+    if (data.recentOrders.length > 0) {
+        dbBody.innerHTML = '';
+        data.recentOrders.forEach((o) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong style="color: var(--cyan);">${o.id}</strong></td>
+                <td>${o.userId}</td>
+                <td>${o.productId}</td>
+                <td>${o.quantity}</td>
+                <td>$${o.totalAmount}</td>
+                <td><span class="badge" style="color: #34d399;">COMMITTED</span></td>
+                <td><span class="badge" style="color: #38bdf8;">ORDER_CREATED</span></td>
+                <td><span class="badge" style="color: #10b981;">PERSISTED</span></td>
+            `;
+            dbBody.appendChild(tr);
+        });
+    }
+
+    // 5. Update Latency Chart
     if (latencyChart) {
         latencyHistory.push(parseFloat(data.queueStats.avgLatencyMs) || 0.5);
         if (latencyHistory.length > 20) latencyHistory.shift();
@@ -92,6 +168,44 @@ function updateUI(data) {
     }
 }
 
+// Playground API Execution
+async function triggerPlaygroundCheckout() {
+    const term = document.getElementById('playground-terminal');
+    const log = (msg, cls = 'system') => {
+        const line = document.createElement('div');
+        line.className = `term-line ${cls}`;
+        line.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        term.appendChild(line);
+        term.scrollTop = term.scrollHeight;
+    };
+
+    log('Dispatching POST /api/checkout ...', 'request');
+    const payload = {
+        userId: 'user_2023001287',
+        productId: 'prod_ps5_pro',
+        quantity: 1,
+        idempotencyKey: `idemp_${Date.now()}`
+    };
+
+    try {
+        const res = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        log(`Response Status: HTTP ${res.status}`, res.status === 201 ? 'response' : 'error');
+        log(JSON.stringify(data, null, 2), res.status === 201 ? 'response' : 'error');
+    } catch (e) {
+        log(`Network Exception: ${e.message}`, 'error');
+    }
+}
+
+function clearConsole() {
+    document.getElementById('playground-terminal').innerHTML = '<div class="term-line system">[SYSTEM] Terminal logs cleared.</div>';
+}
+
+// Manual User Checkout
 async function handleManualCheckout() {
     const userId = document.getElementById('manual-user-id').value || 'guest_user';
     const productId = document.getElementById('manual-product-select').value;
@@ -112,17 +226,21 @@ async function handleManualCheckout() {
 
         if (data.status === 'SUCCESS') {
             alertBox.className = 'alert-box alert-success';
+            alertBox.style.display = 'block';
             alertBox.innerText = `✅ Order Confirmed! ID: ${data.order.id} (Latency: ${data.latencyUs}µs)`;
         } else {
             alertBox.className = 'alert-box alert-error';
+            alertBox.style.display = 'block';
             alertBox.innerText = `❌ ${data.message || data.status}`;
         }
     } catch (e) {
         alertBox.className = 'alert-box alert-error';
+        alertBox.style.display = 'block';
         alertBox.innerText = 'Network error placing order';
     }
 }
 
+// Stress Test Benchmark
 async function runStressBenchmark() {
     const productId = document.getElementById('stress-product-select').value;
     const totalRequests = document.getElementById('input-total-req').value;
@@ -143,28 +261,28 @@ async function runStressBenchmark() {
 
         const card = document.getElementById('stress-result-card');
         card.style.display = 'block';
-        document.getElementById('res-rps').innerText = Number(data.requestsPerSecond).toLocaleString();
-        document.getElementById('res-latency').innerText = data.avgLatencyMs;
+        document.getElementById('res-rps').innerText = Number(data.requestsPerSecond).toLocaleString() + ' RPS';
+        document.getElementById('res-latency').innerText = data.avgLatencyMs + ' ms';
         document.getElementById('res-success').innerText = data.successfulOrders;
-        document.getElementById('res-out-of-stock').innerText = data.outOfStockRejections;
         document.getElementById('res-rate-limited').innerText = data.rateLimitedRejections;
 
         const oversoldBadge = document.getElementById('res-oversold');
         if (data.zeroOversellingVerified) {
-            oversoldBadge.innerText = 'PASSED (Zero Race Conditions / 0 Oversold)';
-            oversoldBadge.className = 'badge-safe';
+            oversoldBadge.innerText = 'PASSED: Zero Inventory Overselling Invariant Verified';
+            oversoldBadge.style.color = '#34d399';
         } else {
-            oversoldBadge.innerText = 'FAILED (Oversold detected)';
+            oversoldBadge.innerText = 'FAILED: Negative Stock Race Condition Detected';
             oversoldBadge.style.color = '#ef4444';
         }
     } catch (e) {
         console.error(e);
     } finally {
         btn.disabled = false;
-        btn.innerText = '⚡ Launch Stress Test';
+        btn.innerText = '⚡ Launch Concurrency Storm';
     }
 }
 
+// Reset Inventory Cache
 async function resetInventory() {
     await fetch('/api/inventory/reset', { method: 'POST' });
     document.getElementById('stress-result-card').style.display = 'none';
@@ -191,8 +309,8 @@ function initChart() {
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-                y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
-                x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } }
+                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
+                x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } }
             }
         }
     });
